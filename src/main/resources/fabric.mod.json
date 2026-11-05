@@ -1,36 +1,38 @@
 {
-    "schemaVersion": 1,
-    "id": "easierchests",
-    "version": "${version}",
-    "environment": "client",
-    "entrypoints": {
-        "client": [ "de.guntram.mcmod.easierchests.EasierChests" ],
-        "modmenu": [ "de.guntram.mcmod.easierchests.MMConfigurationHandler" ]
-    },
-    "custom": {
-        "modupdater": {
-            "strategy": "json",
-            "url": "https://raw.githubusercontent.com/gbl/ModVersionInfo/master/EasierChests.json"
-        }
-    },
-    "mixins": [
-        "mixins.easierchests.json"
-        , "mixins.easierchests_debug.json"
+  "schemaVersion": 1,
+  "id": "easierchests",
+  "version": "${version}",
+
+  "name": "EasierChests",
+  "description": "Adds sorting and move buttons to chests",
+  "authors": [
+    "Guntram",
+    "keijo"
+  ],
+  "contact": {
+    "sources": "https://github.com/keijodputt/EasierChestsRLDK"
+  },
+
+  "license": "CC0-1.0",
+  "icon": "icon.png",
+
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "de.guntram.mcmod.easierchests.EasierChests"
     ],
-    "depends": {
-        "fabric-api": "*",
-	"gbfabrictools": ">=1.4+1.20"
-    },
-    "recommends": {
-      "modmenu" : "*"
-    },    
-    "name": "EasierChests",
-    "description": "Move stuff between inventory and chests, and sort them",
-    "icon": "icon.png",
-    "authors": [ "Giselbaer" ],
-    "contact": {
-        "homepage": "https://minecraft.curseforge.com/projects/easierchests",
-        "sources": "https://github.com/gbl/EasierChests/",
-        "issues": "https://github.com/gbl/EasierChests/issues"
-    }
+    "modmenu": [
+      "de.guntram.mcmod.easierchests.MMConfigurationHandler"
+    ]
+  },
+  "mixins": [
+    "mixins.easierchests.json"
+  ],
+
+  "depends": {
+    "fabricloader": ">=0.14.21",
+    "fabric": "*",
+    "minecraft": ">=1.20",
+    "gbfabrictools": ">=1.3.4"
+  }
 }
