@@ -1,12 +1,12 @@
 {
     "required": true,
     "package": "de.guntram.mcmod.easierchests.mixins",
-    "refmap": "EasierChests-refmap.json",
-    "minVersion": "0.6",
+    "compatibilityLevel": "JAVA_21",
+    "minVersion": "0.8",
     "client": [
+        "AbstractContainerScreenMixin",
         "GuiContainerMixin",
-        "ShulkerBoxInventoryMixin",
-        "AbstractContainerScreenMixin"
+        "ShulkerBoxInventoryMixin"
     ],
     "injectors": {
         "defaultRequire": 1
