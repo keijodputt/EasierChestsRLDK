@@ -1,10 +1,10 @@
 plugins {
-    id 'fabric-loom' version '1.5-SNAPSHOT'
+    id 'fabric-loom' version '1.18.2'
     id 'maven-publish'
 }
 
-sourceCompatibility = JavaVersion.VERSION_17
-targetCompatibility = JavaVersion.VERSION_17
+sourceCompatibility = JavaVersion.VERSION_25
+targetCompatibility = JavaVersion.VERSION_25
 
 archivesBaseName = project.archives_base_name
 version = project.mod_version
@@ -15,17 +15,6 @@ repositories {
         name = "Fabric API"
         url = "https://maven.fabricmc.net/"
     }
-    maven {
-        name = "GBFabricTools, CrowdinTranslate"
-        url = "https://minecraft.guntram.de/maven/"
-    }
-    maven {
-        name = "ModMenu"
-        url = "https://maven.terraformersmc.com/releases/"
-    }
-    maven {
-        url = "https://maven.shedaniel.me/"
-    }
     mavenCentral()
 }
 
@@ -34,10 +23,6 @@ dependencies {
     mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
     modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
-    modImplementation "com.terraformersmc:modmenu:${project.modmenu_version}"
-
-    modImplementation "de.guntram.mcmod:GBfabrictools:${project.gbfabrictools_version}"
-    include "de.guntram.mcmod:GBfabrictools:${project.gbfabrictools_version}"
 }
 
 processResources {
@@ -49,7 +34,7 @@ processResources {
 }
 
 tasks.withType(JavaCompile).configureEach {
-    it.options.release = 17
+    it.options.release = 25
 }
 
 java {
