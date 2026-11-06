@@ -2,9 +2,8 @@
   "schemaVersion": 1,
   "id": "easierchests",
   "version": "${version}",
-
   "name": "EasierChests",
-  "description": "Adds sorting and move buttons to chests",
+  "description": "Adds convenient buttons to sort, dump, and manage chest inventories.",
   "authors": [
     "Guntram",
     "keijo"
@@ -12,10 +11,8 @@
   "contact": {
     "sources": "https://github.com/keijodputt/EasierChestsRLDK"
   },
-
   "license": "CC0-1.0",
   "icon": "icon.png",
-
   "environment": "client",
   "entrypoints": {
     "client": [
@@ -28,11 +25,12 @@
   "mixins": [
     "mixins.easierchests.json"
   ],
-
   "depends": {
-    "fabricloader": ">=0.14.21",
-    "fabric": "*",
-    "minecraft": ">=1.20",
-    "gbfabrictools": ">=1.3.4"
+    "fabricloader": ">=0.19.0",
+    "minecraft": ">=26.2 <=26.3",
+    "fabric-api": "*"
+  },
+  "suggests": {
+    "modmenu": "*"
   }
 }
