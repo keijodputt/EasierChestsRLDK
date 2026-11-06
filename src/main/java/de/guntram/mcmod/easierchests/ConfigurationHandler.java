@@ -1,99 +1,150 @@
 package de.guntram.mcmod.easierchests;
 
-import de.guntram.mcmod.fabrictools.ConfigChangedEvent;
-import de.guntram.mcmod.fabrictools.Configuration;
-import de.guntram.mcmod.fabrictools.ModConfigurationHandler;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 
-public class ConfigurationHandler implements ModConfigurationHandler {
+public class ConfigurationHandler {
 
     private static ConfigurationHandler instance;
+    private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
-    private Configuration config;
-    private String configFileName;
+    private File configFile;
+
+    // Configurable options
+    private boolean extraLargeChests = false;
+    private boolean halfSizeButtons = false;
+    private boolean toneDownButtons = true;
+    private boolean enableSearch = true;
+    private boolean enableRowButtons = true;
+    private boolean enableColumnButtons = true;
+    private String matchHighlightColor = "4000ff00";
+    private int clickDelayTicks = 1;
 
     public static ConfigurationHandler getInstance() {
-        if (instance==null)
-            instance=new ConfigurationHandler();
+        if (instance == null) {
+            instance = new ConfigurationHandler();
+        }
         return instance;
     }
-    private boolean extraLargeChests;
-    private boolean halfSizeButtons;
-    private boolean toneDownButtons;
-    private boolean enableSearch, enableRowButtons, enableColumnButtons;
-    private String matchHighlightColor;
 
-    public void load(final File configFile) {
-        if (config == null) {
-            config = new Configuration(configFile);
-            configFileName=configFile.getPath();
-            loadConfig();
+    public void load(final File file) {
+        this.configFile = file;
+        if (configFile.exists()) {
+            try (FileReader reader = new FileReader(configFile)) {
+                ConfigurationHandler loaded = GSON.fromJson(reader, ConfigurationHandler.class);
+                if (loaded != null) {
+                    this.extraLargeChests = loaded.extraLargeChests;
+                    this.halfSizeButtons = loaded.halfSizeButtons;
+                    this.toneDownButtons = loaded.toneDownButtons;
+                    this.enableSearch = loaded.enableSearch;
+                    this.enableRowButtons = loaded.enableRowButtons;
+                    this.enableColumnButtons = loaded.enableColumnButtons;
+                    if (loaded.matchHighlightColor != null) {
+                        this.matchHighlightColor = loaded.matchHighlightColor;
+                    }
+                    if (loaded.clickDelayTicks >= 0) {
+                        this.clickDelayTicks = loaded.clickDelayTicks;
+                    }
+                }
+            } catch (IOException e) {
+                System.err.println("[EasierChests] Could not read configuration file: " + e.getMessage());
+            }
+        } else {
+            save();
         }
     }
 
-    @Override
-    public void onConfigChanged(ConfigChangedEvent.OnConfigChangedEvent event) {
-        // System.out.println("OnConfigChanged for "+event.getModID());
-        if (event.getModID().equalsIgnoreCase(EasierChests.MODID)) {
-            loadConfig();
+    public void save() {
+        if (configFile == null) {
+            return;
+        }
+        try {
+            File parent = configFile.getParentFile();
+            if (parent != null && !parent.exists()) {
+                parent.mkdirs();
+            }
+            try (FileWriter writer = new FileWriter(configFile)) {
+                GSON.toJson(this, writer);
+            }
+        } catch (IOException e) {
+            System.err.println("[EasierChests] Could not save configuration file: " + e.getMessage());
         }
     }
-    
-    private void loadConfig() {
-        
-        config.migrate("Allow extra large chests", "easierchests.config.largechests");
-        config.migrate("Half button size", "easierchests.config.halfsize");
-        config.migrate("Transparent buttons", "easierchests.config.transparent");
-        extraLargeChests=config.getBoolean("easierchests.config.largechests", Configuration.CATEGORY_CLIENT, false, "easierchests.config.tt.largechests");
-        halfSizeButtons=config.getBoolean("easierchests.config.halfsize", Configuration.CATEGORY_CLIENT, false, "easierchests.config.tt.halfsize");
-        toneDownButtons=config.getBoolean("easierchests.config.transparent", Configuration.CATEGORY_CLIENT, true, "easierchests.config.tt.transparent");
-        enableSearch=config.getBoolean("easierchests.config.enablesearch", Configuration.CATEGORY_CLIENT, true, "easierchests.config.tt.enablesearch");
-        enableRowButtons=config.getBoolean("easierchests.config.enablerowbuttons", Configuration.CATEGORY_CLIENT, true, "easierchests.config.tt.enablerowbuttons");
-        enableColumnButtons=config.getBoolean("easierchests.config.enablecolumnbuttons", Configuration.CATEGORY_CLIENT, true, "easierchests.config.tt.enablecolumnbuttons");
-        matchHighlightColor=config.getString("easierchests.config.highlight", Configuration.CATEGORY_CLIENT, "4000ff00", "easierchests.config.tt.highlight");
-        
-        if (config.hasChanged())
-            config.save();
-    }
-    
-    @Override
-    public Configuration getConfig() {
-        return config;
-    }
-    
+
     public static String getConfigFileName() {
-        return getInstance().configFileName;
+        return getInstance().configFile != null ? getInstance().configFile.getPath() : "";
     }
-    
+
     public static boolean allowExtraLargeChests() {
         return getInstance().extraLargeChests;
     }
-    
+
+    public static void setAllowExtraLargeChests(boolean value) {
+        getInstance().extraLargeChests = value;
+    }
+
     public static boolean toneDownButtons() {
         return getInstance().toneDownButtons;
     }
-    
+
+    public static void setToneDownButtons(boolean value) {
+        getInstance().toneDownButtons = value;
+    }
+
     public static boolean halfSizeButtons() {
         return getInstance().halfSizeButtons;
     }
-    
+
+    public static void setHalfSizeButtons(boolean value) {
+        getInstance().halfSizeButtons = value;
+    }
+
     public static boolean enableSearch() {
         return getInstance().enableSearch;
     }
-    
+
+    public static void setEnableSearch(boolean value) {
+        getInstance().enableSearch = value;
+    }
+
     public static boolean enableColumnButtons() {
         return getInstance().enableColumnButtons;
+    }
+
+    public static void setEnableColumnButtons(boolean value) {
+        getInstance().enableColumnButtons = value;
     }
 
     public static boolean enableRowButtons() {
         return getInstance().enableRowButtons;
     }
 
+    public static void setEnableRowButtons(boolean value) {
+        getInstance().enableRowButtons = value;
+    }
+
     public static void toggleSearchBox() {
         getInstance().enableSearch = !getInstance().enableSearch;
+        getInstance().save();
     }
-    
+
     public static String getHighlightColor() {
         return getInstance().matchHighlightColor;
+    }
+
+    public static void setHighlightColor(String value) {
+        getInstance().matchHighlightColor = value;
+    }
+
+    public static int getClickDelayTicks() {
+        return getInstance().clickDelayTicks;
+    }
+
+    public static void setClickDelayTicks(int value) {
+        getInstance().clickDelayTicks = Math.max(0, value);
     }
 }
