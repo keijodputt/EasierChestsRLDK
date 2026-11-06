@@ -1,99 +1,89 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package de.guntram.mcmod.easierchests;
 
-import java.io.BufferedReader;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.HashSet;
+import java.util.Set;
 
-/**
- *
- * @author gbl
- */
 public class FrozenSlotDatabase {
-    
-    private final static int PLAYER_SLOTS=36;
-    private static File configFile;
-    private static boolean frozenSlots[];
-    
-    public static void init (File configDir) {
-        frozenSlots=new boolean[PLAYER_SLOTS];
-        configFile=new File(configDir, "easierChests.slots.txt");
-        if (!loadConfigFile()) {
-            for (int i=0; i<5; i++)
-                frozenSlots[i]=true;
-            for (int i=5; i<PLAYER_SLOTS; i++)
-                frozenSlots[i]=false;
+
+    private static final Set<Integer> FROZEN_SLOTS = new HashSet<>();
+    private static File storageFile;
+
+    public static void init(File file) {
+        storageFile = file;
+        load();
+    }
+
+    public static boolean isSlotFrozen(int slotIndex) {
+        return FROZEN_SLOTS.contains(slotIndex);
+    }
+
+    public static void toggleSlot(int slotIndex) {
+        if (FROZEN_SLOTS.contains(slotIndex)) {
+            FROZEN_SLOTS.remove(slotIndex);
+        } else {
+            FROZEN_SLOTS.add(slotIndex);
+        }
+        save();
+    }
+
+    public static void freezeSlot(int slotIndex) {
+        if (FROZEN_SLOTS.add(slotIndex)) {
+            save();
         }
     }
 
-    private static boolean loadConfigFile() {
-        BufferedReader reader=null;
-        Pattern pattern=Pattern.compile("frozen\\.(\\d+)=(.*)");
-        System.out.println("trying to read frozen slots from "+configFile.getAbsolutePath());
+    public static void unfreezeSlot(int slotIndex) {
+        if (FROZEN_SLOTS.remove(slotIndex)) {
+            save();
+        }
+    }
+
+    public static void clearAll() {
+        FROZEN_SLOTS.clear();
+        save();
+    }
+
+    private static void load() {
+        FROZEN_SLOTS.clear();
+        if (storageFile == null || !storageFile.exists()) {
+            return;
+        }
+
+        try (DataInputStream in = new DataInputStream(new FileInputStream(storageFile))) {
+            int count = in.readInt();
+            for (int i = 0; i < count; i++) {
+                FROZEN_SLOTS.add(in.readInt());
+            }
+        } catch (IOException e) {
+            System.err.println("[EasierChests] Failed to load frozen slots: " + e.getMessage());
+        }
+    }
+
+    private static void save() {
+        if (storageFile == null) {
+            return;
+        }
+
         try {
-            reader=new BufferedReader(new FileReader(configFile));
-            String line;
-            while ((line=reader.readLine())!=null) {
-                Matcher matcher=pattern.matcher(line);
-                if (matcher.matches()) {
-                    try {
-                        int index=Integer.parseInt(matcher.group(1));
-                        String value=matcher.group(2);
-                        if (index>=0 && index<PLAYER_SLOTS)
-                            frozenSlots[index]=value.startsWith("t");
-                    } catch (NumberFormatException ex) {
-                        ;
-                    }
+            File parent = storageFile.getParentFile();
+            if (parent != null && !parent.exists()) {
+                parent.mkdirs();
+            }
+
+            try (DataOutputStream out = new DataOutputStream(new FileOutputStream(storageFile))) {
+                out.writeInt(FROZEN_SLOTS.size());
+                for (int slotIndex : FROZEN_SLOTS) {
+                    out.writeInt(slotIndex);
                 }
             }
-            reader.close();
-            return true;
-        } catch (IOException ex) {
-            System.out.println(ex);
-            try {
-                if (reader!=null)
-                    reader.close();
-            } catch (IOException ex1) {
-            }
-            return false;
-        }
-    }
-    
-    private static void saveConfigFile() {
-        PrintWriter writer=null;
-        System.out.println("trying to save frozen slots to "+configFile.getAbsolutePath());
-        try {
-            writer=new PrintWriter(new FileWriter(configFile));
-            for (int i=0; i<PLAYER_SLOTS; i++)
-                writer.println("frozen."+i+"="+(frozenSlots[i] ? "true" : "false"));
-            writer.close();
-        } catch (IOException ex) {
-            System.out.println(ex);
-            if (writer!=null)
-                writer.close();
-        }
-    }
-    
-    public static boolean isSlotFrozen(int slot) {
-        if (slot>=0 && slot<PLAYER_SLOTS)
-            return frozenSlots[slot];
-        else
-            return false;
-    }
-    
-    public static void setSlotFrozen(int slot, boolean b) {
-        if (slot>=0 && slot<PLAYER_SLOTS && frozenSlots[slot]!=b) {
-            frozenSlots[slot]=b;
-            saveConfigFile();
+        } catch (IOException e) {
+            System.err.println("[EasierChests] Failed to save frozen slots: " + e.getMessage());
         }
     }
 }
