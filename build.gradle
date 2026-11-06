@@ -1,14 +1,18 @@
 plugins {
+    id 'java'
     id 'fabric-loom' version '1.19.3'
     id 'maven-publish'
 }
 
-sourceCompatibility = JavaVersion.VERSION_25
-targetCompatibility = JavaVersion.VERSION_25
-
 archivesBaseName = project.archives_base_name
 version = project.mod_version
 group = project.maven_group
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_25
+    targetCompatibility = JavaVersion.VERSION_25
+    withSourcesJar()
+}
 
 repositories {
     maven {
@@ -41,10 +45,6 @@ processResources {
 
 tasks.withType(JavaCompile).configureEach {
     it.options.release = 25
-}
-
-java {
-    withSourcesJar()
 }
 
 jar {
